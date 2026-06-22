@@ -1,365 +1,266 @@
-
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Secure Room</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: var(--font-sans); }
-.app { padding: 1rem 0; }
-.view { display: none; }
-.view.active { display: block; }
-input, textarea, button, select { font-family: var(--font-sans); }
-.card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.25rem; margin-bottom: 1rem; }
-.label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; }
-.badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
-.badge-ok { background: var(--color-background-success); color: var(--color-text-success); }
-.badge-full { background: var(--color-background-danger); color: var(--color-text-danger); }
-.badge-empty { background: var(--color-background-secondary); color: var(--color-text-secondary); }
-.slot-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
-.slot-row:last-child { border-bottom: none; }
-.slot-num { width: 24px; height: 24px; border-radius: 50%; background: var(--color-background-secondary); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--color-text-secondary); flex-shrink: 0; }
-.slot-info { flex: 1; min-width: 0; }
-.slot-name { font-size: 13px; font-weight: 500; color: var(--color-text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.slot-meta { font-size: 11px; color: var(--color-text-secondary); margin-top: 1px; }
-.slot-actions { display: flex; gap: 6px; flex-shrink: 0; }
-.btn-sm { font-size: 12px; padding: 4px 10px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-primary); cursor: pointer; }
-.btn-sm:hover { background: var(--color-background-secondary); }
-.btn-danger { border-color: var(--color-border-danger); color: var(--color-text-danger); }
-.btn-danger:hover { background: var(--color-background-danger); }
-.err { font-size: 12px; color: var(--color-text-danger); margin-top: 6px; min-height: 18px; }
-.success-msg { font-size: 12px; color: var(--color-text-success); margin-top: 6px; }
-.tabs { display: flex; gap: 0; border-bottom: 0.5px solid var(--color-border-tertiary); margin-bottom: 1.25rem; }
-.tab { padding: 8px 16px; font-size: 13px; color: var(--color-text-secondary); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -0.5px; }
-.tab.active { color: var(--color-text-primary); border-bottom-color: var(--color-text-primary); font-weight: 500; }
-.file-drop { border: 1.5px dashed var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 1.5rem; text-align: center; color: var(--color-text-secondary); font-size: 13px; cursor: pointer; margin-bottom: 8px; }
-.file-drop:hover { background: var(--color-background-secondary); }
-.section-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 1rem; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#f5f5f5;color:#1a1a1a;min-height:100vh;padding:20px}
+.wrap{max-width:520px;margin:0 auto}
+.card{background:#fff;border:1px solid #e0e0e0;border-radius:14px;padding:22px;margin-bottom:16px}
+h1{font-size:20px;font-weight:600;margin-bottom:4px}
+.sub{font-size:13px;color:#777;margin-bottom:18px}
+.tab-row{display:flex;gap:8px;margin-bottom:18px}
+.tab{flex:1;padding:9px;font-size:13px;font-weight:500;border:1px solid #ddd;border-radius:10px;cursor:pointer;background:#fff;color:#666;transition:.15s}
+.tab.on{background:#e8f0fe;color:#1a5cd6;border-color:transparent}
+input,textarea{width:100%;padding:10px 13px;border:1px solid #ddd;border-radius:10px;font-size:14px;font-family:inherit;margin-bottom:10px;background:#fff;color:#1a1a1a;outline:none;transition:.15s}
+input:focus,textarea:focus{border-color:#1a5cd6}
+input[type="file"]{padding:8px;background:#f9f9f9}
+button{width:100%;padding:10px;font-size:14px;font-weight:500;border:1px solid #ccc;border-radius:10px;cursor:pointer;background:#fff;color:#1a1a1a;transition:.15s}
+button:hover{background:#f0f0f0}
+button.primary{background:#1a5cd6;color:#fff;border-color:transparent}
+button.primary:hover{background:#1450bb}
+button.danger{background:#fff0f0;color:#c0392b;border-color:#f5c0c0}
+button.danger:hover{background:#ffe0e0}
+button.sm{width:auto;padding:5px 12px;font-size:12px}
+.slot{background:#f9f9f9;border:1px solid #eee;border-radius:10px;padding:10px 13px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.slot-num{font-size:11px;color:#aaa;min-width:18px;text-align:center}
+.slot-info{flex:1;min-width:0}
+.slot-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot-meta{font-size:11px;color:#999;margin-top:2px}
+.slot-empty{font-size:12px;color:#bbb;font-style:italic}
+.slot-actions{display:flex;gap:6px}
+.badge{font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px;display:inline-block}
+.binfo{background:#e8f0fe;color:#1a5cd6}
+.bwarn{background:#fff3cd;color:#856404}
+.bok{background:#d4edda;color:#155724}
+.berr{background:#f8d7da;color:#721c24}
+.err{font-size:12px;color:#c0392b;margin-top:4px}
+.ok{font-size:12px;color:#27ae60;margin-top:4px}
+.sep{border:none;border-top:1px solid #eee;margin:14px 0}
+.prog{height:5px;background:#eee;border-radius:4px;margin-bottom:16px;overflow:hidden}
+.progb{height:100%;background:#1a5cd6;border-radius:4px;transition:width .3s}
+.room-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.avatar{width:40px;height:40px;border-radius:50%;background:#e8f0fe;display:flex;align-items:center;justify-content:center;font-size:16px;color:#1a5cd6;font-weight:700;flex-shrink:0}
+.back-row{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.back-row button{width:auto;padding:7px 12px}
+.room-list-item{background:#f9f9f9;border:1px solid #eee;border-radius:10px;padding:10px 14px;margin-bottom:8px}
+.room-list-name{font-size:13px;font-weight:600}
+.room-list-meta{font-size:11px;color:#999;margin-top:2px}
 </style>
-
-<div class="app">
-  <h2 class="sr-only">ระบบแชร์ไฟล์และข้อความแบบห้อง</h2>
-
-  <div id="homeView" class="view active">
-    <div style="margin-bottom:1.5rem;">
-      <div class="section-title">DropRoom</div>
-      <p style="font-size:13px;color:var(--color-text-secondary);">แชร์ไฟล์หรือข้อความแบบมีรหัส — สูงสุด 5 slot ต่อห้อง</p>
-    </div>
-    <div class="tabs">
-      <div class="tab active" onclick="switchTab('create')">สร้างห้อง</div>
-      <div class="tab" onclick="switchTab('join')">เข้าห้อง</div>
-    </div>
-
-    <div id="tabCreate">
-      <div class="card">
-        <div class="label">ชื่อห้อง</div>
-        <input type="text" id="newRoomName" placeholder="เช่น my-room-2024" style="width:100%;margin-bottom:10px;" maxlength="30">
-        <div class="label">รหัสผ่าน</div>
-        <input type="password" id="newRoomPass" placeholder="ตั้งรหัสผ่านห้อง" style="width:100%;margin-bottom:10px;" maxlength="30">
-        <button onclick="createRoom()" style="width:100%;">สร้างห้อง</button>
-        <div class="err" id="createErr"></div>
-      </div>
-    </div>
-
-    <div id="tabJoin" style="display:none;">
-      <div class="card">
-        <div class="label">ชื่อห้อง</div>
-        <input type="text" id="joinRoomName" placeholder="ชื่อห้องที่ได้รับมา" style="width:100%;margin-bottom:10px;">
-        <div class="label">รหัสผ่าน</div>
-        <input type="password" id="joinRoomPass" placeholder="รหัสผ่าน" style="width:100%;margin-bottom:10px;">
-        <button onclick="joinRoom()" style="width:100%;">เข้าห้อง</button>
-        <div class="err" id="joinErr"></div>
-      </div>
-    </div>
-  </div>
-
-  <div id="roomView" class="view">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-      <div>
-        <div class="section-title" id="roomTitle">ห้อง: —</div>
-        <div style="font-size:12px;color:var(--color-text-secondary);" id="roomSlotCount"></div>
-      </div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn-sm btn-danger" onclick="deleteRoom()"><i class="ti ti-trash" style="font-size:14px;"></i> ลบห้อง</button>
-        <button class="btn-sm" onclick="goHome()"><i class="ti ti-arrow-left" style="font-size:14px;"></i> ออก</button>
-      </div>
-    </div>
-
-    <div class="tabs">
-      <div class="tab active" onclick="switchRoomTab('upload')">อัปโหลด</div>
-      <div class="tab" onclick="switchRoomTab('slots')">ดู Slot</div>
-    </div>
-
-    <div id="tabUpload">
-      <div class="card">
-        <div class="tabs" style="border:none;margin-bottom:1rem;">
-          <div class="tab active" style="padding:4px 12px;font-size:12px;" onclick="switchUploadType('text')">ข้อความ</div>
-          <div class="tab" style="padding:4px 12px;font-size:12px;" onclick="switchUploadType('file')">ไฟล์</div>
-        </div>
-        <div id="uploadText">
-          <div class="label">ข้อความ</div>
-          <textarea id="textContent" placeholder="พิมพ์ข้อความที่ต้องการแชร์..." style="width:100%;min-height:80px;resize:vertical;margin-bottom:8px;"></textarea>
-        </div>
-        <div id="uploadFile" style="display:none;">
-          <div class="file-drop" onclick="document.getElementById('fileInput').click()">
-            <i class="ti ti-upload" style="font-size:20px;display:block;margin-bottom:4px;" aria-hidden="true"></i>
-            คลิกเพื่อเลือกไฟล์
-          </div>
-          <input type="file" id="fileInput" style="display:none;" onchange="onFileSelect(event)">
-          <div id="fileSelected" style="font-size:12px;color:var(--color-text-secondary);"></div>
-        </div>
-        <button onclick="addSlot()" style="width:100%;margin-top:8px;">เพิ่มใน Slot <i class="ti ti-plus" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i></button>
-        <div class="err" id="uploadErr"></div>
-        <div class="success-msg" id="uploadOk"></div>
-      </div>
-    </div>
-
-    <div id="tabSlots" style="display:none;">
-      <div class="card" id="slotsList"></div>
-    </div>
-  </div>
-
-  <div id="accessView" class="view">
-    <div style="margin-bottom:1rem;">
-      <button class="btn-sm" onclick="goHome()"><i class="ti ti-arrow-left" style="font-size:14px;"></i> กลับ</button>
-    </div>
-    <div class="card">
-      <div class="section-title" id="accessSlotTitle">เข้าถึง Slot</div>
-      <div class="label" style="margin-bottom:4px;">ใส่รหัสผ่านห้องเพื่อเข้าถึง</div>
-      <input type="password" id="accessPass" placeholder="รหัสผ่าน" style="width:100%;margin-bottom:10px;">
-      <button onclick="unlockSlot()" style="width:100%;">ปลดล็อก</button>
-      <div class="err" id="accessErr"></div>
-    </div>
-    <div id="accessContent" style="display:none;">
-      <div class="card">
-        <div id="accessInner"></div>
-      </div>
-    </div>
-  </div>
+</head>
+<body>
+<div class="wrap">
+  <div id="app"></div>
 </div>
-
 <script>
-const MAX_SLOTS = 5;
-let currentRoom = null;
-let currentSlotIdx = null;
-let selectedFile = null;
+const MAX = 5;
+let S = { view: 'home', room: null, own: false };
 
-async function loadRooms() {
-  try {
-    const r = await window.storage.get('rooms', true);
-    return r ? JSON.parse(r.value) : {};
-  } catch { return {}; }
+function loadR() {
+  try { return JSON.parse(localStorage.getItem('sr_rooms') || '{}'); } catch { return {}; }
+}
+function saveR(d) { localStorage.setItem('sr_rooms', JSON.stringify(d)); }
+function ts() {
+  return new Date().toLocaleString('th-TH', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' });
+}
+function fmtSz(b) {
+  if (!b) return '';
+  if (b < 1024) return b + ' B';
+  if (b < 1048576) return Math.round(b / 1024) + ' KB';
+  return (b / 1048576).toFixed(1) + ' MB';
 }
 
-async function saveRooms(rooms) {
-  await window.storage.set('rooms', JSON.stringify(rooms), true);
+function render() {
+  const a = document.getElementById('app');
+  if (S.view === 'home') a.innerHTML = homeHTML();
+  else a.innerHTML = roomHTML();
 }
 
-function switchTab(t) {
-  document.getElementById('tabCreate').style.display = t === 'create' ? 'block' : 'none';
-  document.getElementById('tabJoin').style.display = t === 'join' ? 'block' : 'none';
-  document.querySelectorAll('#homeView .tab').forEach((el, i) => el.classList.toggle('active', (i === 0 && t === 'create') || (i === 1 && t === 'join')));
+function homeHTML() {
+  const R = loadR();
+  const cnt = Object.keys(R).length;
+  const rows = cnt === 0
+    ? '<div style="font-size:13px;color:#bbb">ยังไม่มีห้อง</div>'
+    : Object.entries(R).map(([k, r]) => `
+      <div class="room-list-item">
+        <div class="room-list-name">🔒 ${k}</div>
+        <div class="room-list-meta">${r.items.length}/${MAX} รายการ · สร้างเมื่อ ${r.created}</div>
+      </div>`).join('');
+  return `
+  <div class="card">
+    <h1>🔐 Secure Room</h1>
+    <div class="sub">แชร์ไฟล์และข้อความแบบมีรหัสผ่าน · สูงสุด ${MAX} รายการต่อห้อง</div>
+    <div class="tab-row">
+      <button class="tab on" id="tc" onclick="sw('c')">➕ สร้างห้อง</button>
+      <button class="tab" id="tj" onclick="sw('j')">🚪 เข้าห้อง</button>
+    </div>
+    <div id="cp">
+      <input id="cn" placeholder="ชื่อห้อง เช่น myroom123"/>
+      <input id="cpw" type="password" placeholder="รหัสผ่าน"/>
+      <button class="primary" onclick="createR()">สร้างห้อง</button>
+      <div id="cm"></div>
+    </div>
+    <div id="jp" style="display:none">
+      <input id="jn" placeholder="ชื่อห้อง"/>
+      <input id="jpw" type="password" placeholder="รหัสผ่าน"/>
+      <button class="primary" onclick="joinR()">เข้าห้อง</button>
+      <div id="jm"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-size:13px;font-weight:600;color:#999;margin-bottom:10px">ห้องในระบบ: ${cnt} ห้อง</div>
+    ${rows}
+  </div>`;
 }
 
-function switchRoomTab(t) {
-  document.getElementById('tabUpload').style.display = t === 'upload' ? 'block' : 'none';
-  document.getElementById('tabSlots').style.display = t === 'slots' ? 'block' : 'none';
-  document.querySelectorAll('#roomView .tabs:first-of-type .tab').forEach((el, i) => el.classList.toggle('active', (i === 0 && t === 'upload') || (i === 1 && t === 'slots')));
-  if (t === 'slots') renderSlots();
+function sw(t) {
+  document.getElementById('cp').style.display = t === 'c' ? 'block' : 'none';
+  document.getElementById('jp').style.display = t === 'j' ? 'block' : 'none';
+  document.getElementById('tc').className = 'tab' + (t === 'c' ? ' on' : '');
+  document.getElementById('tj').className = 'tab' + (t === 'j' ? ' on' : '');
 }
 
-function switchUploadType(t) {
-  document.getElementById('uploadText').style.display = t === 'text' ? 'block' : 'none';
-  document.getElementById('uploadFile').style.display = t === 'file' ? 'block' : 'none';
-  document.querySelectorAll('#tabUpload .tabs .tab').forEach((el, i) => el.classList.toggle('active', (i === 0 && t === 'text') || (i === 1 && t === 'file')));
+function createR() {
+  const n = document.getElementById('cn').value.trim();
+  const p = document.getElementById('cpw').value;
+  const m = document.getElementById('cm');
+  if (!n || !p) { m.innerHTML = '<div class="err">กรุณากรอกชื่อห้องและรหัสผ่าน</div>'; return; }
+  if (!/^[a-zA-Z0-9_-]+$/.test(n)) { m.innerHTML = '<div class="err">ชื่อห้องใช้ได้แค่ a-z, 0-9, -, _</div>'; return; }
+  const R = loadR();
+  if (R[n]) { m.innerHTML = '<div class="err">ชื่อห้องนี้มีอยู่แล้ว</div>'; return; }
+  R[n] = { pass: p, items: [], created: ts() };
+  saveR(R);
+  S = { view: 'room', room: n, own: true };
+  render();
 }
 
-function showView(v) {
-  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
-  document.getElementById(v).classList.add('active');
+function joinR() {
+  const n = document.getElementById('jn').value.trim();
+  const p = document.getElementById('jpw').value;
+  const m = document.getElementById('jm');
+  const R = loadR();
+  if (!R[n]) { m.innerHTML = '<div class="err">ไม่พบห้องนี้</div>'; return; }
+  if (R[n].pass !== p) { m.innerHTML = '<div class="err">รหัสผ่านไม่ถูกต้อง</div>'; return; }
+  S = { view: 'room', room: n, own: false };
+  render();
 }
 
-function goHome() { currentRoom = null; showView('homeView'); }
-
-async function createRoom() {
-  const name = document.getElementById('newRoomName').value.trim();
-  const pass = document.getElementById('newRoomPass').value.trim();
-  const err = document.getElementById('createErr');
-  err.textContent = '';
-  if (!name) { err.textContent = 'กรุณาใส่ชื่อห้อง'; return; }
-  if (!pass) { err.textContent = 'กรุณาตั้งรหัสผ่าน'; return; }
-  if (!/^[a-zA-Z0-9\-_ก-๙]+$/.test(name)) { err.textContent = 'ชื่อห้องใช้ได้เฉพาะตัวอักษร ตัวเลข และ - _'; return; }
-  const rooms = await loadRooms();
-  if (rooms[name]) { err.textContent = 'ชื่อห้องนี้มีอยู่แล้ว'; return; }
-  rooms[name] = { pass, slots: [], createdAt: Date.now() };
-  await saveRooms(rooms);
-  currentRoom = name;
-  openRoom(name, rooms[name]);
-}
-
-async function joinRoom() {
-  const name = document.getElementById('joinRoomName').value.trim();
-  const pass = document.getElementById('joinRoomPass').value.trim();
-  const err = document.getElementById('joinErr');
-  err.textContent = '';
-  if (!name || !pass) { err.textContent = 'กรุณาใส่ชื่อห้องและรหัสผ่าน'; return; }
-  const rooms = await loadRooms();
-  if (!rooms[name]) { err.textContent = 'ไม่พบห้องนี้'; return; }
-  if (rooms[name].pass !== pass) { err.textContent = 'รหัสผ่านไม่ถูกต้อง'; return; }
-  currentRoom = name;
-  openRoom(name, rooms[name]);
-}
-
-function openRoom(name, data) {
-  document.getElementById('roomTitle').textContent = 'ห้อง: ' + name;
-  document.getElementById('uploadErr').textContent = '';
-  document.getElementById('uploadOk').textContent = '';
-  document.getElementById('textContent').value = '';
-  document.getElementById('fileSelected').textContent = '';
-  selectedFile = null;
-  updateSlotCount(data.slots.length);
-  switchRoomTab('upload');
-  showView('roomView');
-}
-
-function updateSlotCount(n) {
-  document.getElementById('roomSlotCount').textContent = `${n}/${MAX_SLOTS} slot ที่ใช้แล้ว`;
-}
-
-function onFileSelect(e) {
-  const f = e.target.files[0];
-  if (!f) return;
-  if (f.size > 500000) { document.getElementById('uploadErr').textContent = 'ไฟล์ใหญ่เกิน 500KB'; selectedFile = null; return; }
-  selectedFile = f;
-  document.getElementById('fileSelected').textContent = 'เลือก: ' + f.name + ' (' + Math.round(f.size/1024) + ' KB)';
-}
-
-async function addSlot() {
-  const err = document.getElementById('uploadErr');
-  const ok = document.getElementById('uploadOk');
-  err.textContent = ''; ok.textContent = '';
-  const isFile = document.getElementById('uploadFile').style.display !== 'none';
-  const rooms = await loadRooms();
-  const room = rooms[currentRoom];
-  if (room.slots.length >= MAX_SLOTS) { err.textContent = 'ห้องเต็มแล้ว (5/5 slot) กรุณาลบ slot เก่าก่อน'; return; }
-  let slot = { id: Date.now(), createdAt: Date.now() };
-  if (isFile) {
-    if (!selectedFile) { err.textContent = 'กรุณาเลือกไฟล์'; return; }
-    const base64 = await toBase64(selectedFile);
-    slot.type = 'file';
-    slot.fileName = selectedFile.name;
-    slot.fileType = selectedFile.type;
-    slot.data = base64;
-  } else {
-    const txt = document.getElementById('textContent').value.trim();
-    if (!txt) { err.textContent = 'กรุณาใส่ข้อความ'; return; }
-    slot.type = 'text';
-    slot.data = txt;
-  }
-  room.slots.push(slot);
-  await saveRooms(rooms);
-  updateSlotCount(room.slots.length);
-  ok.textContent = 'เพิ่ม slot สำเร็จ!';
-  document.getElementById('textContent').value = '';
-  selectedFile = null;
-  document.getElementById('fileInput').value = '';
-  document.getElementById('fileSelected').textContent = '';
-  setTimeout(() => ok.textContent = '', 2000);
-}
-
-function toBase64(file) {
-  return new Promise((res, rej) => {
-    const r = new FileReader();
-    r.onload = () => res(r.result);
-    r.onerror = rej;
-    r.readAsDataURL(file);
-  });
-}
-
-async function renderSlots() {
-  const rooms = await loadRooms();
-  const room = rooms[currentRoom];
-  const list = document.getElementById('slotsList');
-  if (!room.slots.length) { list.innerHTML = '<div style="color:var(--color-text-secondary);font-size:13px;text-align:center;padding:1rem;">ยังไม่มี slot</div>'; return; }
-  updateSlotCount(room.slots.length);
-  list.innerHTML = room.slots.map((s, i) => `
-    <div class="slot-row">
+function roomHTML() {
+  const R = loadR();
+  const room = R[S.room];
+  if (!room) { S.view = 'home'; render(); return ''; }
+  const items = room.items;
+  const pct = Math.round(items.length / MAX * 100);
+  const slots = Array.from({ length: MAX }, (_, i) => {
+    const it = items[i];
+    if (!it) return `<div class="slot"><div class="slot-num">${i+1}</div><div class="slot-empty">ว่าง</div></div>`;
+    return `<div class="slot">
       <div class="slot-num">${i+1}</div>
       <div class="slot-info">
-        <div class="slot-name">${s.type === 'file' ? s.fileName : truncate(s.data, 40)}</div>
-        <div class="slot-meta">${s.type === 'file' ? 'ไฟล์' : 'ข้อความ'} · ${timeAgo(s.createdAt)}</div>
+        <div class="slot-name">${it.name}</div>
+        <div class="slot-meta">${it.type==='file'?'📄 ไฟล์ · '+fmtSz(it.size):'💬 ข้อความ'} · ${it.ts}</div>
       </div>
       <div class="slot-actions">
-        <button class="btn-sm" onclick="viewSlot(${i})"><i class="ti ti-eye" style="font-size:13px;"></i> ดู</button>
-        <button class="btn-sm btn-danger" onclick="deleteSlot(${i})"><i class="ti ti-trash" style="font-size:13px;"></i></button>
+        ${it.type==='text'?`<button class="sm" onclick="cpyIt(${i})">📋 Copy</button>`:''}
+        ${it.type==='file'?`<button class="sm" onclick="dlIt(${i})">⬇️ ดาวน์โหลด</button>`:''}
+        ${S.own?`<button class="sm danger" onclick="delIt(${i})">🗑️</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+  return `
+  <div class="back-row">
+    <button onclick="goHome()">← กลับ</button>
+    <div class="room-header" style="margin:0;flex:1">
+      <div class="avatar">${S.room[0].toUpperCase()}</div>
+      <div>
+        <div style="font-size:15px;font-weight:600">${S.room}</div>
+        <div style="font-size:12px;color:#999">${S.own?'👑 เจ้าของห้อง':'👤 ผู้เยี่ยมชม'} · ${items.length}/${MAX} slot</div>
       </div>
     </div>
-  `).join('');
+    ${S.own?`<button class="danger sm" onclick="delRoom()">🗑️ ลบห้อง</button>`:''}
+  </div>
+  <div class="prog"><div class="progb" style="width:${pct}%"></div></div>
+  <div class="card">
+    <div style="font-size:13px;font-weight:600;margin-bottom:10px">
+      รายการในห้อง ${items.length>0?`<span class="badge binfo">${items.length}/${MAX}</span>`:''}
+      ${items.length>=MAX?'<span class="badge bwarn" style="margin-left:6px">เต็ม</span>':''}
+    </div>
+    ${slots}
+  </div>
+  <div class="card">
+    <div style="font-size:13px;font-weight:600;margin-bottom:12px">
+      เพิ่มรายการ
+      ${items.length>=MAX?'<span class="badge bwarn" style="margin-left:6px">อันใหม่จะดันอันแรกออก</span>':''}
+    </div>
+    <div style="font-size:12px;color:#999;margin-bottom:6px;font-weight:600">💬 ข้อความ</div>
+    <textarea id="txtin" rows="3" placeholder="พิมพ์ข้อความ..." style="resize:vertical"></textarea>
+    <input id="txtlbl" placeholder="ชื่อ / label (ไม่บังคับ)"/>
+    <button class="primary" onclick="addTxt()" style="margin-bottom:4px">+ เพิ่มข้อความ</button>
+    <div class="sep"></div>
+    <div style="font-size:12px;color:#999;margin-bottom:6px;font-weight:600">📄 ไฟล์</div>
+    <input type="file" id="filein"/>
+    <button class="primary" onclick="addFile()" style="margin-top:8px;margin-bottom:4px">⬆️ อัปโหลดไฟล์</button>
+    <div id="rmsg"></div>
+  </div>`;
 }
 
-function truncate(str, n) { return str.length > n ? str.slice(0, n) + '...' : str; }
+function goHome() { S = { view: 'home', room: null, own: false }; render(); }
 
-function timeAgo(ts) {
-  const d = Math.round((Date.now() - ts) / 60000);
-  if (d < 1) return 'เมื่อกี้';
-  if (d < 60) return d + ' นาทีที่แล้ว';
-  return Math.round(d/60) + ' ชั่วโมงที่แล้ว';
+function addTxt() {
+  const txt = document.getElementById('txtin').value.trim();
+  const lbl = document.getElementById('txtlbl').value.trim();
+  if (!txt) { showM('<div class="err">กรุณาพิมพ์ข้อความ</div>'); return; }
+  const R = loadR();
+  const room = R[S.room];
+  room.items.push({ type: 'text', name: lbl || txt.substring(0, 30) + (txt.length > 30 ? '...' : ''), content: txt, ts: ts() });
+  if (room.items.length > MAX) room.items.shift();
+  saveR(R); render();
 }
 
-function viewSlot(idx) {
-  currentSlotIdx = idx;
-  document.getElementById('accessSlotTitle').textContent = 'ปลดล็อก Slot ' + (idx+1);
-  document.getElementById('accessPass').value = '';
-  document.getElementById('accessErr').textContent = '';
-  document.getElementById('accessContent').style.display = 'none';
-  showView('accessView');
+function addFile() {
+  const f = document.getElementById('filein').files[0];
+  if (!f) { showM('<div class="err">กรุณาเลือกไฟล์</div>'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    const R = loadR();
+    const room = R[S.room];
+    room.items.push({ type: 'file', name: f.name, size: f.size, data: e.target.result, ts: ts() });
+    if (room.items.length > MAX) room.items.shift();
+    saveR(R); render();
+  };
+  reader.readAsDataURL(f);
 }
 
-async function unlockSlot() {
-  const pass = document.getElementById('accessPass').value.trim();
-  const err = document.getElementById('accessErr');
-  err.textContent = '';
-  const rooms = await loadRooms();
-  const room = rooms[currentRoom];
-  if (room.pass !== pass) { err.textContent = 'รหัสผ่านไม่ถูกต้อง'; return; }
-  const slot = room.slots[currentSlotIdx];
-  const inner = document.getElementById('accessInner');
-  if (slot.type === 'text') {
-    inner.innerHTML = `
-      <div class="label" style="margin-bottom:6px;">ข้อความ</div>
-      <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px;font-size:13px;white-space:pre-wrap;word-break:break-all;color:var(--color-text-primary);">${escHtml(slot.data)}</div>
-      <button onclick="copyText(${JSON.stringify(slot.data).replace(/</g,'&lt;')})" style="margin-top:10px;width:100%;"><i class="ti ti-copy" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> คัดลอก</button>
-    `;
-  } else {
-    inner.innerHTML = `
-      <div class="label" style="margin-bottom:6px;">ไฟล์: ${escHtml(slot.fileName)}</div>
-      <a href="${slot.data}" download="${escHtml(slot.fileName)}" style="display:block;">
-        <button style="width:100%;"><i class="ti ti-download" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> ดาวน์โหลด ${escHtml(slot.fileName)}</button>
-      </a>
-    `;
-  }
-  document.getElementById('accessContent').style.display = 'block';
+function cpyIt(i) {
+  const R = loadR();
+  const it = R[S.room].items[i];
+  if (it?.content) { navigator.clipboard.writeText(it.content); showM('<div class="ok">✅ คัดลอกแล้ว!</div>'); }
 }
 
-function copyText(txt) {
-  navigator.clipboard.writeText(txt).then(() => {
-    const b = document.querySelector('#accessInner button');
-    if (b) { b.textContent = 'คัดลอกแล้ว!'; setTimeout(() => b.innerHTML = '<i class="ti ti-copy" style="font-size:14px;vertical-align:-2px;"></i> คัดลอก', 1500); }
-  });
+function dlIt(i) {
+  const R = loadR();
+  const it = R[S.room].items[i];
+  if (it?.data) { const a = document.createElement('a'); a.href = it.data; a.download = it.name; a.click(); }
 }
 
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function delIt(i) {
+  if (!confirm('ลบรายการนี้?')) return;
+  const R = loadR(); R[S.room].items.splice(i, 1); saveR(R); render();
 }
 
-async function deleteSlot(idx) {
-  const rooms = await loadRooms();
-  rooms[currentRoom].slots.splice(idx, 1);
-  await saveRooms(rooms);
-  renderSlots();
+function delRoom() {
+  if (!confirm('ลบห้อง "' + S.room + '" และข้อมูลทั้งหมด?')) return;
+  const R = loadR(); delete R[S.room]; saveR(R); goHome();
 }
 
-async function deleteRoom() {
-  if (!confirm('ลบห้องนี้และข้อมูลทั้งหมด?')) return;
-  const rooms = await loadRooms();
-  delete rooms[currentRoom];
-  await saveRooms(rooms);
-  goHome();
+function showM(h) {
+  const e = document.getElementById('rmsg');
+  if (e) { e.innerHTML = h; setTimeout(() => e.innerHTML = '', 2500); }
 }
+
+render();
 </script>
+</body>
+</html>
