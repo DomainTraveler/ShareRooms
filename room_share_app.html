@@ -1,0 +1,365 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+.app { padding: 1rem 0; }
+.view { display: none; }
+.view.active { display: block; }
+input, textarea, button, select { font-family: var(--font-sans); }
+.card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.25rem; margin-bottom: 1rem; }
+.label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; }
+.badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+.badge-ok { background: var(--color-background-success); color: var(--color-text-success); }
+.badge-full { background: var(--color-background-danger); color: var(--color-text-danger); }
+.badge-empty { background: var(--color-background-secondary); color: var(--color-text-secondary); }
+.slot-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.slot-row:last-child { border-bottom: none; }
+.slot-num { width: 24px; height: 24px; border-radius: 50%; background: var(--color-background-secondary); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--color-text-secondary); flex-shrink: 0; }
+.slot-info { flex: 1; min-width: 0; }
+.slot-name { font-size: 13px; font-weight: 500; color: var(--color-text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.slot-meta { font-size: 11px; color: var(--color-text-secondary); margin-top: 1px; }
+.slot-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.btn-sm { font-size: 12px; padding: 4px 10px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-primary); cursor: pointer; }
+.btn-sm:hover { background: var(--color-background-secondary); }
+.btn-danger { border-color: var(--color-border-danger); color: var(--color-text-danger); }
+.btn-danger:hover { background: var(--color-background-danger); }
+.err { font-size: 12px; color: var(--color-text-danger); margin-top: 6px; min-height: 18px; }
+.success-msg { font-size: 12px; color: var(--color-text-success); margin-top: 6px; }
+.tabs { display: flex; gap: 0; border-bottom: 0.5px solid var(--color-border-tertiary); margin-bottom: 1.25rem; }
+.tab { padding: 8px 16px; font-size: 13px; color: var(--color-text-secondary); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -0.5px; }
+.tab.active { color: var(--color-text-primary); border-bottom-color: var(--color-text-primary); font-weight: 500; }
+.file-drop { border: 1.5px dashed var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 1.5rem; text-align: center; color: var(--color-text-secondary); font-size: 13px; cursor: pointer; margin-bottom: 8px; }
+.file-drop:hover { background: var(--color-background-secondary); }
+.section-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 1rem; }
+</style>
+
+<div class="app">
+  <h2 class="sr-only">ระบบแชร์ไฟล์และข้อความแบบห้อง</h2>
+
+  <div id="homeView" class="view active">
+    <div style="margin-bottom:1.5rem;">
+      <div class="section-title">DropRoom</div>
+      <p style="font-size:13px;color:var(--color-text-secondary);">แชร์ไฟล์หรือข้อความแบบมีรหัส — สูงสุด 5 slot ต่อห้อง</p>
+    </div>
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('create')">สร้างห้อง</div>
+      <div class="tab" onclick="switchTab('join')">เข้าห้อง</div>
+    </div>
+
+    <div id="tabCreate">
+      <div class="card">
+        <div class="label">ชื่อห้อง</div>
+        <input type="text" id="newRoomName" placeholder="เช่น my-room-2024" style="width:100%;margin-bottom:10px;" maxlength="30">
+        <div class="label">รหัสผ่าน</div>
+        <input type="password" id="newRoomPass" placeholder="ตั้งรหัสผ่านห้อง" style="width:100%;margin-bottom:10px;" maxlength="30">
+        <button onclick="createRoom()" style="width:100%;">สร้างห้อง</button>
+        <div class="err" id="createErr"></div>
+      </div>
+    </div>
+
+    <div id="tabJoin" style="display:none;">
+      <div class="card">
+        <div class="label">ชื่อห้อง</div>
+        <input type="text" id="joinRoomName" placeholder="ชื่อห้องที่ได้รับมา" style="width:100%;margin-bottom:10px;">
+        <div class="label">รหัสผ่าน</div>
+        <input type="password" id="joinRoomPass" placeholder="รหัสผ่าน" style="width:100%;margin-bottom:10px;">
+        <button onclick="joinRoom()" style="width:100%;">เข้าห้อง</button>
+        <div class="err" id="joinErr"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="roomView" class="view">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+      <div>
+        <div class="section-title" id="roomTitle">ห้อง: —</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);" id="roomSlotCount"></div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-sm btn-danger" onclick="deleteRoom()"><i class="ti ti-trash" style="font-size:14px;"></i> ลบห้อง</button>
+        <button class="btn-sm" onclick="goHome()"><i class="ti ti-arrow-left" style="font-size:14px;"></i> ออก</button>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" onclick="switchRoomTab('upload')">อัปโหลด</div>
+      <div class="tab" onclick="switchRoomTab('slots')">ดู Slot</div>
+    </div>
+
+    <div id="tabUpload">
+      <div class="card">
+        <div class="tabs" style="border:none;margin-bottom:1rem;">
+          <div class="tab active" style="padding:4px 12px;font-size:12px;" onclick="switchUploadType('text')">ข้อความ</div>
+          <div class="tab" style="padding:4px 12px;font-size:12px;" onclick="switchUploadType('file')">ไฟล์</div>
+        </div>
+        <div id="uploadText">
+          <div class="label">ข้อความ</div>
+          <textarea id="textContent" placeholder="พิมพ์ข้อความที่ต้องการแชร์..." style="width:100%;min-height:80px;resize:vertical;margin-bottom:8px;"></textarea>
+        </div>
+        <div id="uploadFile" style="display:none;">
+          <div class="file-drop" onclick="document.getElementById('fileInput').click()">
+            <i class="ti ti-upload" style="font-size:20px;display:block;margin-bottom:4px;" aria-hidden="true"></i>
+            คลิกเพื่อเลือกไฟล์
+          </div>
+          <input type="file" id="fileInput" style="display:none;" onchange="onFileSelect(event)">
+          <div id="fileSelected" style="font-size:12px;color:var(--color-text-secondary);"></div>
+        </div>
+        <button onclick="addSlot()" style="width:100%;margin-top:8px;">เพิ่มใน Slot <i class="ti ti-plus" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i></button>
+        <div class="err" id="uploadErr"></div>
+        <div class="success-msg" id="uploadOk"></div>
+      </div>
+    </div>
+
+    <div id="tabSlots" style="display:none;">
+      <div class="card" id="slotsList"></div>
+    </div>
+  </div>
+
+  <div id="accessView" class="view">
+    <div style="margin-bottom:1rem;">
+      <button class="btn-sm" onclick="goHome()"><i class="ti ti-arrow-left" style="font-size:14px;"></i> กลับ</button>
+    </div>
+    <div class="card">
+      <div class="section-title" id="accessSlotTitle">เข้าถึง Slot</div>
+      <div class="label" style="margin-bottom:4px;">ใส่รหัสผ่านห้องเพื่อเข้าถึง</div>
+      <input type="password" id="accessPass" placeholder="รหัสผ่าน" style="width:100%;margin-bottom:10px;">
+      <button onclick="unlockSlot()" style="width:100%;">ปลดล็อก</button>
+      <div class="err" id="accessErr"></div>
+    </div>
+    <div id="accessContent" style="display:none;">
+      <div class="card">
+        <div id="accessInner"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const MAX_SLOTS = 5;
+let currentRoom = null;
+let currentSlotIdx = null;
+let selectedFile = null;
+
+async function loadRooms() {
+  try {
+    const r = await window.storage.get('rooms', true);
+    return r ? JSON.parse(r.value) : {};
+  } catch { return {}; }
+}
+
+async function saveRooms(rooms) {
+  await window.storage.set('rooms', JSON.stringify(rooms), true);
+}
+
+function switchTab(t) {
+  document.getElementById('tabCreate').style.display = t === 'create' ? 'block' : 'none';
+  document.getElementById('tabJoin').style.display = t === 'join' ? 'block' : 'none';
+  document.querySelectorAll('#homeView .tab').forEach((el, i) => el.classList.toggle('active', (i === 0 && t === 'create') || (i === 1 && t === 'join')));
+}
+
+function switchRoomTab(t) {
+  document.getElementById('tabUpload').style.display = t === 'upload' ? 'block' : 'none';
+  document.getElementById('tabSlots').style.display = t === 'slots' ? 'block' : 'none';
+  document.querySelectorAll('#roomView .tabs:first-of-type .tab').forEach((el, i) => el.classList.toggle('active', (i === 0 && t === 'upload') || (i === 1 && t === 'slots')));
+  if (t === 'slots') renderSlots();
+}
+
+function switchUploadType(t) {
+  document.getElementById('uploadText').style.display = t === 'text' ? 'block' : 'none';
+  document.getElementById('uploadFile').style.display = t === 'file' ? 'block' : 'none';
+  document.querySelectorAll('#tabUpload .tabs .tab').forEach((el, i) => el.classList.toggle('active', (i === 0 && t === 'text') || (i === 1 && t === 'file')));
+}
+
+function showView(v) {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.getElementById(v).classList.add('active');
+}
+
+function goHome() { currentRoom = null; showView('homeView'); }
+
+async function createRoom() {
+  const name = document.getElementById('newRoomName').value.trim();
+  const pass = document.getElementById('newRoomPass').value.trim();
+  const err = document.getElementById('createErr');
+  err.textContent = '';
+  if (!name) { err.textContent = 'กรุณาใส่ชื่อห้อง'; return; }
+  if (!pass) { err.textContent = 'กรุณาตั้งรหัสผ่าน'; return; }
+  if (!/^[a-zA-Z0-9\-_ก-๙]+$/.test(name)) { err.textContent = 'ชื่อห้องใช้ได้เฉพาะตัวอักษร ตัวเลข และ - _'; return; }
+  const rooms = await loadRooms();
+  if (rooms[name]) { err.textContent = 'ชื่อห้องนี้มีอยู่แล้ว'; return; }
+  rooms[name] = { pass, slots: [], createdAt: Date.now() };
+  await saveRooms(rooms);
+  currentRoom = name;
+  openRoom(name, rooms[name]);
+}
+
+async function joinRoom() {
+  const name = document.getElementById('joinRoomName').value.trim();
+  const pass = document.getElementById('joinRoomPass').value.trim();
+  const err = document.getElementById('joinErr');
+  err.textContent = '';
+  if (!name || !pass) { err.textContent = 'กรุณาใส่ชื่อห้องและรหัสผ่าน'; return; }
+  const rooms = await loadRooms();
+  if (!rooms[name]) { err.textContent = 'ไม่พบห้องนี้'; return; }
+  if (rooms[name].pass !== pass) { err.textContent = 'รหัสผ่านไม่ถูกต้อง'; return; }
+  currentRoom = name;
+  openRoom(name, rooms[name]);
+}
+
+function openRoom(name, data) {
+  document.getElementById('roomTitle').textContent = 'ห้อง: ' + name;
+  document.getElementById('uploadErr').textContent = '';
+  document.getElementById('uploadOk').textContent = '';
+  document.getElementById('textContent').value = '';
+  document.getElementById('fileSelected').textContent = '';
+  selectedFile = null;
+  updateSlotCount(data.slots.length);
+  switchRoomTab('upload');
+  showView('roomView');
+}
+
+function updateSlotCount(n) {
+  document.getElementById('roomSlotCount').textContent = `${n}/${MAX_SLOTS} slot ที่ใช้แล้ว`;
+}
+
+function onFileSelect(e) {
+  const f = e.target.files[0];
+  if (!f) return;
+  if (f.size > 500000) { document.getElementById('uploadErr').textContent = 'ไฟล์ใหญ่เกิน 500KB'; selectedFile = null; return; }
+  selectedFile = f;
+  document.getElementById('fileSelected').textContent = 'เลือก: ' + f.name + ' (' + Math.round(f.size/1024) + ' KB)';
+}
+
+async function addSlot() {
+  const err = document.getElementById('uploadErr');
+  const ok = document.getElementById('uploadOk');
+  err.textContent = ''; ok.textContent = '';
+  const isFile = document.getElementById('uploadFile').style.display !== 'none';
+  const rooms = await loadRooms();
+  const room = rooms[currentRoom];
+  if (room.slots.length >= MAX_SLOTS) { err.textContent = 'ห้องเต็มแล้ว (5/5 slot) กรุณาลบ slot เก่าก่อน'; return; }
+  let slot = { id: Date.now(), createdAt: Date.now() };
+  if (isFile) {
+    if (!selectedFile) { err.textContent = 'กรุณาเลือกไฟล์'; return; }
+    const base64 = await toBase64(selectedFile);
+    slot.type = 'file';
+    slot.fileName = selectedFile.name;
+    slot.fileType = selectedFile.type;
+    slot.data = base64;
+  } else {
+    const txt = document.getElementById('textContent').value.trim();
+    if (!txt) { err.textContent = 'กรุณาใส่ข้อความ'; return; }
+    slot.type = 'text';
+    slot.data = txt;
+  }
+  room.slots.push(slot);
+  await saveRooms(rooms);
+  updateSlotCount(room.slots.length);
+  ok.textContent = 'เพิ่ม slot สำเร็จ!';
+  document.getElementById('textContent').value = '';
+  selectedFile = null;
+  document.getElementById('fileInput').value = '';
+  document.getElementById('fileSelected').textContent = '';
+  setTimeout(() => ok.textContent = '', 2000);
+}
+
+function toBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+async function renderSlots() {
+  const rooms = await loadRooms();
+  const room = rooms[currentRoom];
+  const list = document.getElementById('slotsList');
+  if (!room.slots.length) { list.innerHTML = '<div style="color:var(--color-text-secondary);font-size:13px;text-align:center;padding:1rem;">ยังไม่มี slot</div>'; return; }
+  updateSlotCount(room.slots.length);
+  list.innerHTML = room.slots.map((s, i) => `
+    <div class="slot-row">
+      <div class="slot-num">${i+1}</div>
+      <div class="slot-info">
+        <div class="slot-name">${s.type === 'file' ? s.fileName : truncate(s.data, 40)}</div>
+        <div class="slot-meta">${s.type === 'file' ? 'ไฟล์' : 'ข้อความ'} · ${timeAgo(s.createdAt)}</div>
+      </div>
+      <div class="slot-actions">
+        <button class="btn-sm" onclick="viewSlot(${i})"><i class="ti ti-eye" style="font-size:13px;"></i> ดู</button>
+        <button class="btn-sm btn-danger" onclick="deleteSlot(${i})"><i class="ti ti-trash" style="font-size:13px;"></i></button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function truncate(str, n) { return str.length > n ? str.slice(0, n) + '...' : str; }
+
+function timeAgo(ts) {
+  const d = Math.round((Date.now() - ts) / 60000);
+  if (d < 1) return 'เมื่อกี้';
+  if (d < 60) return d + ' นาทีที่แล้ว';
+  return Math.round(d/60) + ' ชั่วโมงที่แล้ว';
+}
+
+function viewSlot(idx) {
+  currentSlotIdx = idx;
+  document.getElementById('accessSlotTitle').textContent = 'ปลดล็อก Slot ' + (idx+1);
+  document.getElementById('accessPass').value = '';
+  document.getElementById('accessErr').textContent = '';
+  document.getElementById('accessContent').style.display = 'none';
+  showView('accessView');
+}
+
+async function unlockSlot() {
+  const pass = document.getElementById('accessPass').value.trim();
+  const err = document.getElementById('accessErr');
+  err.textContent = '';
+  const rooms = await loadRooms();
+  const room = rooms[currentRoom];
+  if (room.pass !== pass) { err.textContent = 'รหัสผ่านไม่ถูกต้อง'; return; }
+  const slot = room.slots[currentSlotIdx];
+  const inner = document.getElementById('accessInner');
+  if (slot.type === 'text') {
+    inner.innerHTML = `
+      <div class="label" style="margin-bottom:6px;">ข้อความ</div>
+      <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px;font-size:13px;white-space:pre-wrap;word-break:break-all;color:var(--color-text-primary);">${escHtml(slot.data)}</div>
+      <button onclick="copyText(${JSON.stringify(slot.data).replace(/</g,'&lt;')})" style="margin-top:10px;width:100%;"><i class="ti ti-copy" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> คัดลอก</button>
+    `;
+  } else {
+    inner.innerHTML = `
+      <div class="label" style="margin-bottom:6px;">ไฟล์: ${escHtml(slot.fileName)}</div>
+      <a href="${slot.data}" download="${escHtml(slot.fileName)}" style="display:block;">
+        <button style="width:100%;"><i class="ti ti-download" style="font-size:14px;vertical-align:-2px;" aria-hidden="true"></i> ดาวน์โหลด ${escHtml(slot.fileName)}</button>
+      </a>
+    `;
+  }
+  document.getElementById('accessContent').style.display = 'block';
+}
+
+function copyText(txt) {
+  navigator.clipboard.writeText(txt).then(() => {
+    const b = document.querySelector('#accessInner button');
+    if (b) { b.textContent = 'คัดลอกแล้ว!'; setTimeout(() => b.innerHTML = '<i class="ti ti-copy" style="font-size:14px;vertical-align:-2px;"></i> คัดลอก', 1500); }
+  });
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function deleteSlot(idx) {
+  const rooms = await loadRooms();
+  rooms[currentRoom].slots.splice(idx, 1);
+  await saveRooms(rooms);
+  renderSlots();
+}
+
+async function deleteRoom() {
+  if (!confirm('ลบห้องนี้และข้อมูลทั้งหมด?')) return;
+  const rooms = await loadRooms();
+  delete rooms[currentRoom];
+  await saveRooms(rooms);
+  goHome();
+}
+</script>
